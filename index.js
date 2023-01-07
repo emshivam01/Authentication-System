@@ -1,101 +1,145 @@
+require("dotenv").config();
+require("./config/database").connect();
+const validater = require("email-validator");
 const express = require("express");
+const PORT = process.env.PORT;
 const app = express();
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const User = require("./model/user.js");
+const User = require("./models/user");
 
 app.get("/", (req, res) => {
-  res.sendStatus(200).send("Welcome to Authentication System");
+  res.send("Welcome to Home page of Authentication System");
 });
 
 app.post("/register", async (req, res) => {
   try {
-    // collecting all the information
+    // Collecting information from req.body
 
     const { firstname, lastname, email, password } = req.body;
 
-    // Checking/Validating the collected information
+    // Checking if information is present or not
 
     if (!(firstname && lastname && email && password)) {
-      res.sendStatus(400).send("All fields are required");
+      res.sendStatus(400).send("All fields are rquired");
     }
 
-    // Checking if user already exist or not
+    // Validating Email
 
-    const existingUser = await User.findOne(email);
+    const validEmail = validater.validate(email);
+
+    if (!validEmail) {
+      res.status(401).send("Please Enter Valid Email");
+      // res.send("Please Enter Valid Email");
+    }
+
+    // Checking if user exist or not
+
+    const existingUser = await User.findOne({ email });
 
     if (!existingUser) {
-      res.sendStatus(400).send("User Already Exist");
+      res.send("User Already Exist");
     }
 
-    // Encyrpting the password
+    // Encrypting the password
 
-    const encryptPass = bcrypt.hash(password, 10);
+    const encryptedPass = await bcrypt.hash(password, 10);
 
-    // creating user
-    const user = new User.create({
+    // Creating User
+
+    const user = await User.create({
       firstname,
       lastname,
       email,
-      password: encryptPass,
+      password: encryptedPass,
     });
 
-    user.password = undefined;
+    // Creating Token and sending it via cookie
 
-    // Creating token
-
-    const token = jwt.sign({ id: user._id }, "El", { expiresIn: "1h" });
+    const token = jwt.sign(
+      {id: user._id,email},process.env.JWT_SECRET,{ expiresIn: "4h" }
+    );
 
     user.token = token;
+    user.password = undefined;
+
+
+    res.status(200).json(user);
+
+    // res
+    //   .cookie("token", token, {
+    //     expires: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
+    //     httpOnly: true,
+    //   })
+    //   .json({
+    //     success: true,
+    //     token: token,
+    //     user: user,
+    //   });
+
   } catch (error) {
     console.log(error);
+    console.log("Error is response route");
   }
 });
 
 app.post("/login", async (req, res) => {
   try {
-    // collecting info from frontend
+    // Collecting infrom from req.body
 
-    const { firstname, lastname, email, password } = req.body;
+    const { email, password } = req.body;
 
-    // validating info
-
-    if (!(firstname && lastname && email && password)) {
-      res.sendStatus(400).send("<h3>Please fill all the requied fields");
+    if (!(email && password)) {
+      res.send(400).send("All fields are mandatory");
     }
 
-    // Checking is if user exist or not
+    // Validating Email
 
-    const existingUser = User.findOne(email);
+    const validEmail = validater.validate(email);
 
-    if (!existingUser) {
-      res.sendStatus(400).send("User Doesn't Exist");
+    if (!validEmail) {
+      res.sendStatus(401).send("Please Enter Valid Email");
     }
 
-    // Comparing the password
+    // Checking if user already exist or not
 
-    const compared = bcrypt.compare(password, existingUser.password);
+    const existingUser = await User.findOne({ email });
 
-    if (!(existingUser && compared)) {
-      // create token
-
-      const token = jwt.sign({ id: existingUser._id }, "mike", {
-        expiresIn: "1h",
-      });
-
-      // creating options from cookie
-
-      const options = {
-        expires: new Date(Date.now() + 5 * 3600000),
-        httpOnly: true,
-      };
-
-      res.sendStatus(200).cookie("token", token, options).json({
-        success: true,
-        token,
-      });
+    if (!true) {
+      res.send("User Doesn't Exist");
     }
+
+    // Comparing passwords
+
+    const comparedPass = bcrypt.compare(password, existingUser.password);
+
+    if (!comparedPass) {
+      res.send("Email or password is incorrect");
+    }
+
+    // Creating Token and sending it via cookie
+
+    const token = jwt.sign(
+      {
+        id: existingUser._id,
+        email,
+      },
+      process.env.JWT_SECRET
+    );
+
+    res.cookie("token", token, {
+      expires: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
+      httpOnly: true,
+    });
   } catch (error) {
-    console.log(error);
+    res.send("Something Went Wrong");
   }
 });
+
+app.listen(PORT, () => {
+  console.log(`Server is up and running on ${PORT}`);
+});
+
+console.log(PORT);
