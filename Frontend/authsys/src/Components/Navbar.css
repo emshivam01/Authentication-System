@@ -1,0 +1,17 @@
+.heading {
+  text-align: left;
+}
+
+.nav-container {
+  display: flex;
+  /* justify-content: center; */
+  align-items: center;
+  background-color: #f582ae;
+  padding: 0px 25px;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+  height: 20vh;
+  max-height: 70px;
+  color: #001858;
+}
+

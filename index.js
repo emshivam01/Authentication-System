@@ -10,7 +10,9 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const User = require("./models/user");
 const cookieParser = require("cookie-parser");
+const auth = require("./middleware/auth");
 app.use(cookieParser());
+require("./middleware/auth");
 
 app.get("/", (req, res) => {
   res.send("Welcome to Home page of Authentication System");
@@ -136,7 +138,9 @@ app.post("/login", async (req, res) => {
   }
 });
 
-app.get("/dashboard", () => {});
+app.get("/dashboard", auth, (req, res) => {
+  res.send("Welome to dashboard")
+});
 
 app.listen(PORT, () => {
   console.log(`Server is up and running on ${PORT}`);

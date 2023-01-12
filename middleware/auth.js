@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 
-const auth = (req, res) => {
+const auth = (req, res, next) => {
   try {
     const { token } = req.cookies;
 
@@ -21,4 +21,8 @@ const auth = (req, res) => {
     console.log(error);
     console.log("Failed to validate token");
   }
+
+  next();
 };
+
+module.exports = auth;
