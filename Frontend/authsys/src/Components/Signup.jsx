@@ -1,11 +1,9 @@
 import "./Signup.css";
 import { Link } from "react-router-dom";
 import { useState } from "react";
-import React from "react";
-const MyContext = React.createContext();
+// import axios from "axios";
 
 function Signup() {
-  // <MyContext.Provider value={{firstname, lastname}}></MyContext.Provider>
   const [firstname, setfirstname] = useState("");
   const [lastname, setlastname] = useState("");
   const [email, setemail] = useState("");
@@ -27,11 +25,44 @@ function Signup() {
     setpassword(event.target.value);
   };
 
+  //  Sending Data to Database
+
+  const postData = async (event) => {
+    event.preventDefault();
+
+    const res = await fetch("/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        firstname,
+        lastname,
+        email,
+        password,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (res.status === 420 || !data) {
+      const err = res.send;
+      if (err) {
+        window.alert(err);
+      } else {
+        window.alert("User Already Exist");
+      }
+    } else {
+      window.alert("Registration Successfull");
+      window.location.href = "/signin";
+    }
+  };
+
   return (
     <div className="form-container w-full h-[90vh] flex justify-center items-center ">
       <form
-        method=""
-        action=""
+        onSubmit={postData}
+        method="POST"
         className="form flex flex-col justify-around w-96 h-[450px] shadow-xl rounded-xl p-10"
       >
         <input
@@ -46,6 +77,7 @@ function Signup() {
           value={lastname}
           onChange={updateLastname}
           type={"text"}
+          name="lastname"
           className="h-10 rounded-md p-4 focus:shadow-lg border-2 border-gray-300 outline-none text-lg placeholder:text-black"
           placeholder="Lastname"
         />
@@ -53,6 +85,7 @@ function Signup() {
           value={email}
           onChange={updateEmail}
           type={"email"}
+          name="email"
           className="h-10 rounded-md p-4 focus:shadow-lg border-2 border-gray-300 outline-none text-lg placeholder:text-black"
           placeholder="Email"
         />
@@ -60,12 +93,16 @@ function Signup() {
           value={password}
           onChange={updatePass}
           type={"password"}
+          name="password"
           className="h-10 rounded-md p-4 focus:shadow-lg border-2 border-gray-300 outline-none text-lg placeholder:text-black"
           placeholder="Password"
         />
-        <button className="w-full h-10 text-white text-lg hover:shadow-lg bg-[#f582ae] rounded-md">
-          Sign up
-        </button>
+
+        <input
+          className="w-full h-10 text-white text-lg hover:shadow-lg bg-[#f582ae] rounded-md"
+          type={"submit"}
+          value={"Sign Up"}
+        />
 
         <p className="text-center">OR</p>
 

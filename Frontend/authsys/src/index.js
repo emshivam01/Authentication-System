@@ -9,9 +9,7 @@ root.render(
   <React.StrictMode>
     <BrowserRouter>
       <App />
-      <div>
-        <h1 className="text-2xl text-center mb-10">This is top heading {}</h1>
-      </div>
+      <h1>This is heading</h1>
     </BrowserRouter>
   </React.StrictMode>
 );

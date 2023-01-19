@@ -6,7 +6,7 @@ function Signip() {
     <div className="form-container w-full h-[90vh] flex justify-center items-center ">
       <form
         action=""
-        className="form flex flex-col justify-around w-96 h-[450px] shadow-xl rounded-xl p-10"
+        className="form flex flex-col justify-around w-96 h-[400px] shadow-xl rounded-xl p-10"
       >
         <input
           type={"email"}
@@ -25,7 +25,7 @@ function Signip() {
 
         <p className="text-center">OR</p>
 
-        <Link to={"/"}>
+        <Link to={"/register"}>
           <button className="w-full h-10 text-white text-lg hover:shadow-lg bg-[#f582ae] rounded-md">
             Sign up
           </button>
